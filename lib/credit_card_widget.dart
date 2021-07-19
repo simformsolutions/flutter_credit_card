@@ -56,7 +56,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
   late AnimationController controller;
   late Animation<double> _frontRotation;
   late Animation<double> _backRotation;
-  late Gradient backgroundGradientColor;
 
   bool isAmex = false;
 
@@ -70,19 +69,19 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
       vsync: this,
     );
 
-    backgroundGradientColor = LinearGradient(
-      // Where the linear gradient begins and ends
-      begin: Alignment.topRight,
-      end: Alignment.bottomLeft,
-      // Add one stop for each color. Stops should increase from 0 to 1
-      stops: const <double>[0.1, 0.4, 0.7, 0.9],
-      colors: <Color>[
-        widget.cardBgColor.withOpacity(1),
-        widget.cardBgColor.withOpacity(0.97),
-        widget.cardBgColor.withOpacity(0.90),
-        widget.cardBgColor.withOpacity(0.86),
-      ],
-    );
+    // backgroundGradientColor = LinearGradient(
+    //   // Where the linear gradient begins and ends
+    //   begin: Alignment.topRight,
+    //   end: Alignment.bottomLeft,
+    //   // Add one stop for each color. Stops should increase from 0 to 1
+    //   stops: const <double>[0.1, 0.4, 0.7, 0.9],
+    //   colors: <Color>[
+    //     widget.cardBgColor.withOpacity(1),
+    //     widget.cardBgColor.withOpacity(0.97),
+    //     widget.cardBgColor.withOpacity(0.90),
+    //     widget.cardBgColor.withOpacity(0.86),
+    //   ],
+    // );
 
     ///Initialize the Front to back rotation tween sequence.
     _frontRotation = TweenSequence<double>(
@@ -177,7 +176,7 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        gradient: backgroundGradientColor,
+        color: widget.cardBgColor,
       ),
       margin: const EdgeInsets.all(16),
       width: widget.width ?? width,
@@ -268,15 +267,27 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
               ),
             );
 
-    final String number = widget.obscureCardNumber
-        ? widget.cardNumber.replaceAll(RegExp(r'(?<=.{4})\d(?=.{4})'), '*')
-        : widget.cardNumber;
+    String number = widget.cardNumber;
+    if (widget.obscureCardNumber) {
+      final String stripped = number.replaceAll(RegExp(r'[^\d]'), '');
+      if (stripped.length > 8) {
+        final String middle = number
+            .substring(4, number.length - 5)
+            .trim()
+            .replaceAll(RegExp(r'\d'), '*');
+        number = stripped.substring(0, 4) +
+            ' ' +
+            middle +
+            ' ' +
+            stripped.substring(stripped.length - 4);
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        color: widget.cardBgColor,
         borderRadius: BorderRadius.circular(8),
-        gradient: backgroundGradientColor,
         boxShadow: const <BoxShadow>[
           BoxShadow(
             color: Colors.grey,
